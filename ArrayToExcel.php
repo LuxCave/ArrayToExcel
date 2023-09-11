@@ -31,7 +31,7 @@ class ArrayToExcel
                 }
             }
         }
-        return $sheet; // επιστρέφουμε απευθείας το sheet, αν το κάνω αλλιώς θέλει να φτιάξω getter
+        return $sheet; // επιστρέφουμε απευθείας το sheet
     }
 
     private function walk($array, $sheet)
@@ -82,13 +82,6 @@ class ArrayToExcel
         if (stripos($celldata, "€") !== false) {
             $celldata = trim($celldata, "€");
             $celldata = $celldata;
-        }
-
-            // if the value is a negative number, check it
-        if (substr($celldata, 0, 1) == "-") {
-            $celldata = trim($celldata, "-");
-            $celldata = trim($celldata, "'");
-            $celldata = (float)$celldata;
         }
 
         // if it has decimals, check if is formatted correctly
