@@ -85,7 +85,7 @@ class ArrayToExcel
         }
 
             // if the value is a negative number, check it
-        if (substr($celldata, 1, 1) == "-") {
+        if (substr($celldata, 0, 1) == "-") {
             $celldata = trim($celldata, "-");
             $celldata = trim($celldata, "'");
             $celldata = (float)$celldata;
