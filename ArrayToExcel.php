@@ -1,9 +1,7 @@
 <?php
-
 require_once('vendor/autoload.php');
-
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
- use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class ArrayToExcel
 {
@@ -16,7 +14,7 @@ class ArrayToExcel
         $this->spreadsheet->getDefaultStyle()->getNumberFormat()->setFormatCode('#');
 
         $sheet = $this->spreadsheet->getActiveSheet();
-        $finishedsheet = $this->build($array, $sheet); // build in SuiteCRM way
+        $finishedsheet = $this->build($array, $sheet);
         return $finishedsheet;
     }
 
@@ -38,10 +36,10 @@ class ArrayToExcel
     {
         foreach ($array as $key => $data) {
             if (!is_array($data)) {
-                if ($this->row_num == 1) { // in 1st row we put the column title, in 2nd the 1st line of data
+                if ($this->row_num == 1) { 
                     $this->putDataInCell($sheet, 1, $this->col_num, $key);
                     $this->putDataInCell($sheet, 2, $this->col_num, $data);
-                } else { // by 3rd we go as expected
+                } else { 
                     $sheet->setCellValue([$this->col_num, $this->row_num], $data);
                 }
                 $this->col_num++;
@@ -79,37 +77,36 @@ class ArrayToExcel
         $celldata = trim($celldata, '"');
         $celldata = trim($celldata, "'");
 
-        if (stripos($celldata, "€") !== false) {
-            $celldata = trim($celldata, "€");
-            $celldata = $celldata;
-        }
+        if(preg_match("/[a-z]|\+/i", $celldata)){
+            $cell->setValueExplicit($celldata, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING );
 
-        // if it has decimals, check if is formatted correctly
-        $celldata = trim($celldata, "'");
-        $commaMatch = preg_match("/\d\,\d\d/", $celldata);
-        if ($commaMatch) {
-            $celldata = str_replace('.', '', $celldata);
-            $celldata = str_replace(",", ".", $celldata);
-        }
-
-        // if a number format it
-        if (is_numeric($celldata)) {
-            $number = floatval($celldata);
-            $cell->setDataType('Number');
-            $cell->setValue($number);
-            $cordC = $cell->getCoordinate();
-            $sheet->getStyle($cordC)->getNumberFormat()->setFormatCode('#,##0.00');
         } else {
-            $cell->setValue($celldata);
+            if (stripos($celldata, "€") !== false || stripos($celldata, "$") !== false) {
+                $celldata = trim($celldata, "€$");
+                settype($celldata, 'float');
+            }
+
+            $commaMatch = preg_match("/\d\,\d\d/", $celldata);
+            if ($commaMatch) {
+                $celldata = str_replace('.', '', $celldata);
+                $celldata = str_replace(",", ".", $celldata);
+            }
+
+            if (is_numeric($celldata)) {
+                $number = floatval($celldata);
+                $cell->setDataType('Number');
+                $cell->setValue($number);
+                $cordC = $cell->getCoordinate();
+                $sheet->getStyle($cordC)->getNumberFormat()->setFormatCode('#,##0.00');
+            }
         }
 
         // if it is a link
         if (stripos($celldata, "://") !== false) {
             $sheet->getCellByColumnAndRow($cellnum, $rownum)->getHyperlink()->setUrl($celldata);
-        } elseif (stripos($celldata, "@") !== false) { // or if it is a mail // this needs validation
+        } elseif (stripos($celldata, "@") !== false) { // here needs additional validation
             $sheet->getCellByColumnAndRow($cellnum, $rownum)->getHyperlink()->setUrl("mailto:" . $celldata);
         }
-
     }
 
 }
