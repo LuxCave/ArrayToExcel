@@ -31,7 +31,7 @@ class ArrayToExcel
                 }
             }
         }
-        return $sheet; // return directly without a getter
+        return $sheet;
     }
 
     private function walk($array, $sheet)
