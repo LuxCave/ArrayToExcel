@@ -16,7 +16,7 @@ class ArrayToExcel
         $this->spreadsheet->getDefaultStyle()->getNumberFormat()->setFormatCode('#');
 
         $sheet = $this->spreadsheet->getActiveSheet();
-        $finishedsheet = $this->build($array, $sheet); // χτίζουμε με τον τρόπο του SuiteCRM
+        $finishedsheet = $this->build($array, $sheet); // build in SuiteCRM way
         return $finishedsheet;
     }
 
@@ -31,17 +31,17 @@ class ArrayToExcel
                 }
             }
         }
-        return $sheet; // επιστρέφουμε απευθείας το sheet
+        return $sheet; // return directly the sheet without a getter
     }
 
     private function walk($array, $sheet)
     {
         foreach ($array as $key => $data) {
             if (!is_array($data)) {
-                if ($this->row_num == 1) { // στην πρώτη γραμμή βάζουμε τους τίτλους και στη δεύτερη τα πρώτα δεδομένα
+                if ($this->row_num == 1) { // in 1st row we put the column title, in 2nd the 1st line of data
                     $this->putDataInCell($sheet, 1, $this->col_num, $key);
                     $this->putDataInCell($sheet, 2, $this->col_num, $data);
-                } else { // από την 3η και μετά κανονικά
+                } else { // by 3rd we go as expected
                     $sheet->setCellValue([$this->col_num, $this->row_num], $data);
                 }
                 $this->col_num++;
@@ -106,7 +106,7 @@ class ArrayToExcel
         // if it is a link
         if (stripos($celldata, "://") !== false) {
             $sheet->getCellByColumnAndRow($cellnum, $rownum)->getHyperlink()->setUrl($celldata);
-        } elseif (stripos($celldata, "@") !== false) { // or if it is a mail // εδώ χρειάζεται καλύτερο validation
+        } elseif (stripos($celldata, "@") !== false) { // or if it is a mail // this needs validation
             $sheet->getCellByColumnAndRow($cellnum, $rownum)->getHyperlink()->setUrl("mailto:" . $celldata);
         }
 
