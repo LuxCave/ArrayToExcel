@@ -1,2 +1,2 @@
 # ArrayToExcel
-This converts an Array to an Excel file. It is made for SuiteCRM arrays.
+This converts a PHP array to an Excel file. It is made specificaly for SuiteCRM arrays.
