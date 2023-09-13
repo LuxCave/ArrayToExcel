@@ -88,8 +88,9 @@ class ArrayToExcel
             $sheet->getCellByColumnAndRow($cellnum, $rownum)->getHyperlink()->setUrl("mailto:" . $celldata);
         }
 
-        } else { // it is not text or link, so we check if it is a number
-            
+        } else { // it is not text or link, we assume it is a number
+
+            // remove currency signs
             if (stripos($celldata, "€") !== false || stripos($celldata, "$") !== false) { // checks only for Euro or Dollar signs, add your currency
                 $celldata = trim($celldata, "€$");
                 settype($celldata, 'float');
