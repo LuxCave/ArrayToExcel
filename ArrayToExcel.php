@@ -104,7 +104,7 @@ class ArrayToExcel
             }
 
             $cell->setDataType('Number');
-            $cell->setValue($number);
+            $cell->setValue($celldata);
             $cordC = $cell->getCoordinate();
             $sheet->getStyle($cordC)->getNumberFormat()->setFormatCode('#,##0.00');
         }
