@@ -32,7 +32,7 @@ class ArrayToExcel
         return $sheet;
     }
 
-    private function walk($array, $sheet)
+    private function walk($array, $sheet) // recursive
     {
         foreach ($array as $key => $data) {
             if (!is_array($data)) {
@@ -77,36 +77,35 @@ class ArrayToExcel
         $celldata = trim($celldata, '"');
         $celldata = trim($celldata, "'");
 
+        // search for letters and for "+" sign to identify phone numbers, as PhpSpreadsheet searches only for leading zeroes
         if(preg_match("/[a-z]|\+/i", $celldata)){
             $cell->setValueExplicit($celldata, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING );
 
-        } else {
-            if (stripos($celldata, "€") !== false || stripos($celldata, "$") !== false) {
-                $celldata = trim($celldata, "€$");
-                settype($celldata, 'float');
-            }
-
-            $commaMatch = preg_match("/\d\,\d\d/", $celldata);
-            if ($commaMatch) {
-                $celldata = str_replace('.', '', $celldata);
-                $celldata = str_replace(",", ".", $celldata);
-            }
-
-            if (is_numeric($celldata)) {
-                $number = floatval($celldata);
-                $cell->setDataType('Number');
-                $cell->setValue($number);
-                $cordC = $cell->getCoordinate();
-                $sheet->getStyle($cordC)->getNumberFormat()->setFormatCode('#,##0.00');
-            }
-        }
-
-        // if it is a link
+        // check if it is a link or email
         if (stripos($celldata, "://") !== false) {
             $sheet->getCellByColumnAndRow($cellnum, $rownum)->getHyperlink()->setUrl($celldata);
         } elseif (stripos($celldata, "@") !== false) { // here needs additional validation
             $sheet->getCellByColumnAndRow($cellnum, $rownum)->getHyperlink()->setUrl("mailto:" . $celldata);
         }
-    }
 
+        } else { // it is not text or link, so we check if it is a number
+            
+            if (stripos($celldata, "€") !== false || stripos($celldata, "$") !== false) { // checks only for Euro or Dollar signs, add your currency
+                $celldata = trim($celldata, "€$");
+                settype($celldata, 'float');
+            }
+
+            // change decimal separation sign to default (dot)
+            $commaMatch = preg_match("/\d\,\d\d$/", $celldata); // it checks for two digits after a comma on end of the string (greek way), check for your own regional settings if needed
+            if ($commaMatch) {
+                $celldata = str_replace('.', '', $celldata); // removes dots separating thousands
+                $celldata = str_replace(",", ".", $celldata); // replaces comma with default dot
+            }
+
+            $cell->setDataType('Number');
+            $cell->setValue($number);
+            $cordC = $cell->getCoordinate();
+            $sheet->getStyle($cordC)->getNumberFormat()->setFormatCode('#,##0.00');
+        }
+    }
 }
